@@ -7,20 +7,24 @@
   <style>
     div {
       margin: auto;
-      width: 512px;
+	  height: 256px;
+      width: 256px;
     }
     body {
       font-family: "Didact Gothic", sans-serif;
       font-size: 14px;
       text-align: center;
     }
+	canvas {
+	  image-rendering: pixelated;
+	}
   </style>
 </head>
 <body>
-  <div>
-     <h1 id="icontitle">yo (plazeholder)</h1>
-     <p id="iconsubtitle">hi (plazeholder)</p>
-     <p><canvas class="menu" height="256" id="rotary" width="512"> </canvas></p>
+   <h1 id="icontitle">yo</h1>
+   <p id="iconsubtitle">no icon selected</p>
+   <div>
+     <p><canvas class="menu" height="256" id="rotary" width="256"> </canvas></p>
   </div>
   <script>
     // stuffle
@@ -32,6 +36,7 @@
 	}
 	async function drawImageCenteredRotated(img, ctx, dx, dy, angle, image_xscale, image_yscale) {
 	  ctx.save();
+	  ctx.imageSmoothingEnabled = false
 	  ctx.translate(dx, dy);
 	  ctx.rotate(degToRad(angle));
 	  ctx.scale(image_xscale, image_yscale)
@@ -68,29 +73,51 @@
       var pi = Math.PI;
       return degrees * (pi/180);
 	}
+	function lerp(a, b, t) {
+	  return a + (b - a) * t;
+    }
 
-    // i stole this from the gamemaker manualle
+    // i stole this from the gamemaker manual websitele
 	function angle_difference(dest, src){
       return ((((dest - src) % 360.0) + 540.0) % 360.0) - 180.0;
 	}
 	
     // rotary phonele
+	let ready = -1
     let selamount = 5
     let selected = -1
     let selx = []
     let sely = []
     let mxx = 0
     let myy = 0
-	let mult = 100
+	let mult = 101
+	let image_scale = [1, 1, 1, 1, 1]
+	let image_gscale = 1
     let elm = document.getElementById("rotary");
+	let title = document.getElementById("icontitle")
+	let desc = document.getElementById("iconsubtitle")
     let ewidth = elm.clientWidth,
       eheight = elm.clientHeight;
     let context = elm.getContext("2d");
-    let imagePath = ["https://files.catbox.moe/3f9n3m.gif", "https://files.catbox.moe/3f9n3m.gif", "https://files.catbox.moe/3f9n3m.gif", "https://files.catbox.moe/3f9n3m.gif", "https://files.catbox.moe/3f9n3m.gif", "https://files.catbox.moe/l1uzrk.svg"];
-    let img = new Image();
-    img.src = imagePath[0];
+	let imagePaths = ["img/placeholdericon_0.png", "img/placeholdericon_1.png", "img/placeholdericon_2.png", "img/placeholdericon_3.png", "img/placeholdericon_4.png"]
+	let titles = ["Alyssum Fields", "La Galería", "Project Cosmos", "The Waiting Room", "Credits"]
+	let subtitles = [
+	  ["what's north?", "who's north?", "where's north?", "when's north?", "how's north?"],
+	  ["SHHH!", "look ma, i draw!", "please mind the spiders!", "only the finest of arts!", "doomguy_grunt_slowed.wav"],
+	  ["one small step for north, one big step for northkind.", "alys-sun", "And then North said, \'let there be projects!\'", "these are finished, probably.", "SPAAAAAACE!"],
+	  ["PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER"],
+	  ["idiots", "fools", "imbeciles", "babies", "dumb people"]
+	]
+	let already = false
+	let truetitle = "yo"
+	let truesubtitle = "hi"
+	let img = []
+	for (let i = 0; i < selamount; i++) {
+	  img[i] = new Image()
+	  img[i].src = imagePaths[i]
+	}
     let circle = new Image()
-	circle.src = imagePath[5]
+	circle.src = "img/rotarybackground.svg"
 	circle.onload = () => {
 	  drawImageCenteredRotated(circle, context, ewidth / 2, eheight / 2, 0);
 	}
@@ -103,35 +130,80 @@
       mxx = mx
       myy = my
       if (selected > -1) {
-      let calc = degToRad(((150 / selamount) * (selected - ((selamount - 1) / 2))))
-      targetAngle = radToDeg(Math.atan2(diffY, diffX) + calc);
+        let calc = ((150 / selamount) * (selected - ((selamount - 1) / 2)))
+        targetAngle = radToDeg(Math.atan2(diffY, diffX) - degToRad(calc));
+		if (targetAngle > 75 - calc && targetAngle < 105 - calc) {
+		  targetAngle = 90 - calc
+		}
       }
     });
     elm.onmouseup = function(){
-      selected = -1
-      targetAngle = -90
+	  if (targetAngle == 90 - ((150 / selamount) * (selected - ((selamount - 1) / 2)))) {
+	     targetAngle = 0
+	     ready = selected
+		 selected = -1
+		 title.innerHTML = "bye bye!"
+		 desc.innerHTML = "see ya!"
+	  }
+	  if (ready == -1) {
+        selected = -1
+        targetAngle = -90
+		already = false
+	  }
     }
+	elm.onmouseleave = function(){
+	  if (ready == -1) {
+	    selected = -1
+	    targetAngle = -90
+		already = false
+	  }
+	}
+	
     canvasLoop(() => {
+	  if (selected > -1 && already == false) {
+	    truetitle = titles[selected]
+		truesubtitle = subtitles[selected][Math.floor(Math.random() * 5)]
+		already = true
+	  }
+	  if (selected == -1)
+	  {
+	    truetitle = "yo"
+		truesubtitle = "no icon selected"
+	  }
       let diff = angle_difference(targetAngle, angle);
       angle += diff * 0.1;
       angle = angle % 360;
       context.clearRect(0, 0, ewidth, eheight);
 	  drawImageCenteredRotated(circle, context, ewidth / 2, eheight / 2, 0, 1, 1);
+	  if (ready == -1) {
+	    title.innerHTML = truetitle
+	    desc.innerHTML = truesubtitle
+	  } else if (ready > -1) {
+	    mult = lerp(mult, 0, 0.1)
+	  }
       for (let i = 0; i < selamount; i++) {
-      anglerad = degToRad(angle - ((150 / selamount) * (i - ((selamount - 1) / 2))))
-      selx[i] = ewidth / 2 + (Math.cos(anglerad) * mult)
-      sely[i] = eheight / 2 + (Math.sin(anglerad) * mult)
-      drawImageCenteredRotated(img, context, selx[i], sely[i], 0, 1, 1);
+	    image_gscale = (i == selected) ? 0.6 : 1
+		image_gscale = (ready == i) ? 2 : image_gscale
+		image_scale[i] = lerp(image_scale[i], image_gscale, 0.1)
+        anglerad = degToRad(angle + ((150 / selamount) * (i - ((selamount - 1) / 2))))
+        selx[i] = ewidth / 2 + (Math.cos(anglerad) * mult)
+        sely[i] = eheight / 2 + (Math.sin(anglerad) * mult)
+		context.globalCompositeOperation = "source-over";
+		if (ready > -1 && i != ready) {
+		  context.globalCompositeOperation = "destination-over";
+		}
+        drawImageCenteredRotated(img[i], context, selx[i], sely[i], 0, image_scale[i], image_scale[i]);
       }
       elm.onmousedown = function(){
-        for (let i = 0; i < selamount; i++) {
-        if (mxx > selx[i] - 24 && myy > sely[i] - 24 && mxx < selx[i] + 24 && myy < sely[i] + 24){
-        selected = i
-        }
-        }
+	    if (ready == -1) {
+          for (let i = 0; i < selamount; i++) {
+            if (mxx > selx[i] - 24 && myy > sely[i] - 24 && mxx < selx[i] + 24 && myy < sely[i] + 24){
+              selected = i
+            }
+          }
+		}
       }
     });
-    //]]>
   </script>
 </body>
 </html>
