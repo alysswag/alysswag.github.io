@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap" rel="stylesheet">
+  <style>
+    div {
+      margin: auto;
+      width: 512px;
+    }
+    body {
+      font-family: "Didact Gothic", sans-serif;
+      font-size: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div>
+     <h1 id="icontitle">yo (plazeholder)</h1>
+     <p id="iconsubtitle">hi (plazeholder)</p>
+     <p><canvas class="menu" height="256" id="rotary" width="512"> </canvas></p>
+  </div>
+  <script>
+    // stuffle
+    async function drawImage(img, ctx, dx, dy) {
+      ctx.drawImage(img, dx, dy);
+	}
+	async function drawImageCentered(img, ctx, dx, dy) {
+	  ctx.drawImage(img, dx - img.width/2, dy - img.height/2);
+	}
+	async function drawImageCenteredRotated(img, ctx, dx, dy, angle, image_xscale, image_yscale) {
+	  ctx.save();
+	  ctx.translate(dx, dy);
+	  ctx.rotate(degToRad(angle));
+	  ctx.scale(image_xscale, image_yscale)
+	  ctx.translate(-img.width/2, -img.width/2);
+	  ctx.drawImage(img, 0, 0);
+	  ctx.restore();
+	}
+	function getMousePos(canvas, evt) {
+	  var rect = canvas.getBoundingClientRect();
+	  return {
+		x: evt.clientX - rect.left,
+		y: evt.clientY - rect.top
+	  };
+	}
+
+	function canvasLoop(loopFunc){
+	  setInterval(loopFunc, 1000/60);
+	}
+
+	function createMouseMoveEvent(canvas, callback){
+	  canvas.addEventListener('mousemove', function(evt) {
+	    var mousePos = getMousePos(canvas, evt);
+        callback(mousePos.x, mousePos.y);
+      }, false);
+	}
+
+	function radToDeg(radians)
+	{
+      var pi = Math.PI;
+      return radians * (180/pi);
+	}
+	function degToRad(degrees)
+	{
+      var pi = Math.PI;
+      return degrees * (pi/180);
+	}
+
+    // i stole this from the gamemaker manualle
+	function angle_difference(dest, src){
+      return ((((dest - src) % 360.0) + 540.0) % 360.0) - 180.0;
+	}
+	
+    // rotary phonele
+    let selamount = 5
+    let selected = -1
+    let selx = []
+    let sely = []
+    let mxx = 0
+    let myy = 0
+	let mult = 100
+    let elm = document.getElementById("rotary");
+    let ewidth = elm.clientWidth,
+      eheight = elm.clientHeight;
+    let context = elm.getContext("2d");
+    let imagePath = ["https://files.catbox.moe/3f9n3m.gif", "https://files.catbox.moe/3f9n3m.gif", "https://files.catbox.moe/3f9n3m.gif", "https://files.catbox.moe/3f9n3m.gif", "https://files.catbox.moe/3f9n3m.gif", "https://files.catbox.moe/l1uzrk.svg"];
+    let img = new Image();
+    img.src = imagePath[0];
+    let circle = new Image()
+	circle.src = imagePath[5]
+	circle.onload = () => {
+	  drawImageCenteredRotated(circle, context, ewidth / 2, eheight / 2, 0);
+	}
+    var angle = -90;
+    var targetAngle = -90;
+    let anglerad = 0
+    createMouseMoveEvent(elm, (mx, my) => {
+      let diffX = mx - ewidth / 2;
+      let diffY = my - eheight / 2;
+      mxx = mx
+      myy = my
+      if (selected > -1) {
+      let calc = degToRad(((150 / selamount) * (selected - ((selamount - 1) / 2))))
+      targetAngle = radToDeg(Math.atan2(diffY, diffX) + calc);
+      }
+    });
+    elm.onmouseup = function(){
+      selected = -1
+      targetAngle = -90
+    }
+    canvasLoop(() => {
+      let diff = angle_difference(targetAngle, angle);
+      angle += diff * 0.1;
+      angle = angle % 360;
+      context.clearRect(0, 0, ewidth, eheight);
+	  drawImageCenteredRotated(circle, context, ewidth / 2, eheight / 2, 0, 1, 1);
+      for (let i = 0; i < selamount; i++) {
+      anglerad = degToRad(angle - ((150 / selamount) * (i - ((selamount - 1) / 2))))
+      selx[i] = ewidth / 2 + (Math.cos(anglerad) * mult)
+      sely[i] = eheight / 2 + (Math.sin(anglerad) * mult)
+      drawImageCenteredRotated(img, context, selx[i], sely[i], 0, 1, 1);
+      }
+      elm.onmousedown = function(){
+        for (let i = 0; i < selamount; i++) {
+        if (mxx > selx[i] - 24 && myy > sely[i] - 24 && mxx < selx[i] + 24 && myy < sely[i] + 24){
+        selected = i
+        }
+        }
+      }
+    });
+    //]]>
+  </script>
+</body>
+</html>
