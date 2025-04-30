@@ -4,30 +4,83 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap" rel="stylesheet">
+  <div class="overlay-black" id="fader">
+    <button type="button" onclick="init()">ENTER</button>
+  </div>
   <style>
-    div {
-      margin: auto;
+    .main {
+      position: fixed;
+	  top: 50%;
+	  left: 25%;
+	  transform: translate(-50%, -50%);
 	  height: 256px;
       width: 256px;
+	  animation: idle
     }
-    body {
+    .text {
       font-family: "Didact Gothic", sans-serif;
-      font-size: 14px;
+      font-size: 18px;
       text-align: center;
+	  color: white;
+	  text-shadow: 2px 2px black;
+	  z-index:1;
     }
 	canvas {
 	  image-rendering: pixelated;
 	}
+	
+	.overlay-black{
+      position: absolute;
+      top: 0; left: 0;
+      height: 100vh;
+      width: 100vw;
+      z-index:1;
+      background-color:black;
+	  opacity:1;
+	  animation: idle
+	}
+	
+	.background{
+      position: absolute;
+      top: 0; left: 0;
+      height: 100vh;
+      width: 100vw;
+	  background: url(img/bg.png) right bottom no-repeat;
+	  background-size: cover;
+	}
+	
+	@keyframes fadeInOverlay {
+	  0% {opacity:1; z-index:1;}
+	  99% {opacity:0.01; z-index:1;}
+	  100% {opacity:0; z-index:0;}
+	}
+	@keyframes fadeIn {
+	  0% {opacity:0}
+	  100% {opacity:1}
+	}
+	@keyframes idle {
+	  0% {}
+	  100% {}
+	}
   </style>
 </head>
 <body>
-   <h1 id="icontitle">yo</h1>
-   <p id="iconsubtitle">no icon selected</p>
-   <div>
-     <p><canvas class="menu" height="256" id="rotary" width="256"> </canvas></p>
+  <div class="background">
+    <h1 class = "text" id="icontitle">welcome</h1>
+    <p class = "text" id="iconsubtitle">no icon selected</p>
+  </div>
+  <div class="main" id="maindivwhatever">
+    <p><canvas class="menu" height="256" id="rotary" width="256"> </canvas></p>
   </div>
   <script>
-    // stuffle
+    // firefox is weirdle
+   	let fps = 60
+	let isFirefox = typeof InstallTrigger !== 'undefined';
+	if (isFirefox) {
+	  fps *= 2
+	}
+	
+	// functionle
     async function drawImage(img, ctx, dx, dy) {
       ctx.drawImage(img, dx, dy);
 	}
@@ -53,7 +106,7 @@
 	}
 
 	function canvasLoop(loopFunc){
-	  setInterval(loopFunc, 1000/60);
+	  setInterval(loopFunc, 1000/fps);
 	}
 
 	function createMouseMoveEvent(canvas, callback){
@@ -76,6 +129,21 @@
 	function lerp(a, b, t) {
 	  return a + (b - a) * t;
     }
+	
+	function init() {
+	  const audio = new Audio('snd/bus_station_intro.mp3');
+
+      audio.addEventListener('ended', () => {
+	    audio.src = "mus/bus_station/song.mp3"
+	    audio.loop = true
+	    audio.play()
+      });
+
+      audio.play();
+	  
+	  document.getElementById('fader').style.animation="fadeInOverlay 11.75s forwards";
+	  document.getElementById('maindivwhatever').style.animation="fadeIn 11.75s forwards";
+	}
 
     // i stole this from the gamemaker manual websitele
 	function angle_difference(dest, src){
@@ -83,6 +151,7 @@
 	}
 	
     // rotary phonele
+	
 	let ready = -1
     let selamount = 5
     let selected = -1
@@ -109,7 +178,7 @@
 	  ["idiots", "fools", "imbeciles", "babies", "dumb people"]
 	]
 	let already = false
-	let truetitle = "yo"
+	let truetitle = "welcome"
 	let truesubtitle = "hi"
 	let img = []
 	for (let i = 0; i < selamount; i++) {
@@ -167,7 +236,7 @@
 	  }
 	  if (selected == -1)
 	  {
-	    truetitle = "yo"
+	    truetitle = "welcome"
 		truesubtitle = "no icon selected"
 	  }
       let diff = angle_difference(targetAngle, angle);
