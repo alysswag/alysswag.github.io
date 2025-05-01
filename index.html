@@ -4,9 +4,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap" rel="stylesheet">
-  <div class="overlay-black" id="fader">
-    <button type="button" onclick="init()">ENTER</button>
-  </div>
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="manifest" href="site.webmanifest">
+  <title>Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? </title>
   <style>
     .main {
       position: fixed;
@@ -28,6 +30,21 @@
 	canvas {
 	  image-rendering: pixelated;
 	}
+	.entrance {
+	  font-family: "Courier New", sans-serif;
+	  font-size: 18px;
+	  text-align: center;
+	  color: white;
+	  background-color: black;
+	}
+	.center {
+	  margin: 0;
+	  position: absolute;
+	  top: 50%;
+	  left: 50%;
+	  transform: translate(-50%, -50%);
+	}
+	
 	
 	.overlay-black{
       position: absolute;
@@ -48,6 +65,12 @@
 	  background: url(img/bg.png) right bottom no-repeat;
 	  background-size: cover;
 	}
+	.poot{
+      position: absolute;
+      top: 0; left: 0;
+      height: 100vh;
+      width: 100vw;
+	}
 	
 	@keyframes fadeInOverlay {
 	  0% {opacity:1; z-index:1;}
@@ -62,15 +85,37 @@
 	  0% {}
 	  100% {}
 	}
+	@keyframes centerYourself {
+	  100% {
+	    left: 50%;
+	  }
+	}
+	@keyframes fadeOut {
+	  100% {opacity:0}
+	}
   </style>
 </head>
 <body>
-  <div class="background">
+  <div class="overlay-black" id="fader">
+    <div class="center">
+      <h1 class="entrance">welcome to my site!</h1>
+	  <p class="entrance">please click the button below to enter:</p>
+      <button type="button" onclick="init()" class="entrance">ENTER</button>
+	  <p class="entrance">alternatively, if you're allergic to javascript...</p>
+	  <a href="wip/index.html" class="entrance";">waaaah! javascript is scawy!!!</a>
+	  </div>
+  </div>
+  <div class="background" id="bgdiv">
     <h1 class = "text" id="icontitle">welcome</h1>
     <p class = "text" id="iconsubtitle">no icon selected</p>
   </div>
+  <div class="poot">
+  	<svg id="zoom" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%; position:absolute">
+      <circle id="zoomcircle" r="0" cx="50%" cy="50%" stroke="white" fill="white"></circle>
+    </svg>
+  </div>
   <div class="main" id="maindivwhatever">
-    <p><canvas class="menu" height="256" id="rotary" width="256"> </canvas></p>
+    <canvas class="menu" height="256" id="rotary" width="256"></canvas>
   </div>
   <script>
     // firefox is weirdle
@@ -87,13 +132,14 @@
 	async function drawImageCentered(img, ctx, dx, dy) {
 	  ctx.drawImage(img, dx - img.width/2, dy - img.height/2);
 	}
-	async function drawImageCenteredRotated(img, ctx, dx, dy, angle, image_xscale, image_yscale) {
+	async function drawImageCenteredRotated(img, ctx, dx, dy, angle, image_xscale, image_yscale, image_alpha) {
 	  ctx.save();
 	  ctx.imageSmoothingEnabled = false
 	  ctx.translate(dx, dy);
 	  ctx.rotate(degToRad(angle));
 	  ctx.scale(image_xscale, image_yscale)
 	  ctx.translate(-img.width/2, -img.width/2);
+	  ctx.globalAlpha = image_alpha;
 	  ctx.drawImage(img, 0, 0);
 	  ctx.restore();
 	}
@@ -131,18 +177,33 @@
     }
 	
 	function init() {
-	  const audio = new Audio('snd/bus_station_intro.mp3');
-
       audio.addEventListener('ended', () => {
 	    audio.src = "mus/bus_station/song.mp3"
 	    audio.loop = true
 	    audio.play()
+		selected = -1
       });
 
       audio.play();
 	  
 	  document.getElementById('fader').style.animation="fadeInOverlay 11.75s forwards";
 	  document.getElementById('maindivwhatever').style.animation="fadeIn 11.75s forwards";
+	  document.title = "BUS STATION"
+	}
+	
+	function fadeAudio() {
+      var fadeAudio = setInterval(function () {
+
+          // Only fade if not at zero already
+          if (audio.volume != 0.0) {
+              audio.volume = clamp(audio.volume - 0.02, 0.0, 1.0)
+          }
+          // When volume at zero stop all the intervalling
+          if (audio.volume === 0.0) {
+              clearInterval(fadeAudio);
+          }
+      }, 200);
+
 	}
 
     // i stole this from the gamemaker manual websitele
@@ -152,14 +213,19 @@
 	
     // rotary phonele
 	
+	const audio = new Audio('snd/bus_station_intro.mp3');
+	const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 	let ready = -1
     let selamount = 5
-    let selected = -1
+    let selected = -2
     let selx = []
     let sely = []
     let mxx = 0
     let myy = 0
 	let mult = 101
+	let alpha = 1
+	let alpha2 = 1
+	let radius = 0
 	let image_scale = [1, 1, 1, 1, 1]
 	let image_gscale = 1
     let elm = document.getElementById("rotary");
@@ -177,6 +243,7 @@
 	  ["PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER"],
 	  ["idiots", "fools", "imbeciles", "babies", "dumb people"]
 	]
+	let links = ["wip/index.html", "wip/index.html", "wip/index.html", "wip/index.html", "wip/index.html"]
 	let already = false
 	let truetitle = "welcome"
 	let truesubtitle = "hi"
@@ -188,7 +255,7 @@
     let circle = new Image()
 	circle.src = "img/rotarybackground.svg"
 	circle.onload = () => {
-	  drawImageCenteredRotated(circle, context, ewidth / 2, eheight / 2, 0);
+	  drawImageCenteredRotated(circle, context, ewidth / 2, eheight / 2, 0, 1, 1, alpha);
 	}
     var angle = -90;
     var targetAngle = -90;
@@ -213,6 +280,8 @@
 		 selected = -1
 		 title.innerHTML = "bye bye!"
 		 desc.innerHTML = "see ya!"
+		 document.getElementById('maindivwhatever').style.animation="centerYourself 2s ease-out forwards";
+		 fadeAudio()
 	  }
 	  if (ready == -1) {
         selected = -1
@@ -243,14 +312,28 @@
       angle += diff * 0.1;
       angle = angle % 360;
       context.clearRect(0, 0, ewidth, eheight);
-	  drawImageCenteredRotated(circle, context, ewidth / 2, eheight / 2, 0, 1, 1);
+	  drawImageCenteredRotated(circle, context, ewidth / 2, eheight / 2, 0, 1, 1, alpha);
 	  if (ready == -1) {
 	    title.innerHTML = truetitle
 	    desc.innerHTML = truesubtitle
 	  } else if (ready > -1) {
 	    mult = lerp(mult, 0, 0.1)
+		alpha = lerp(alpha, 0, 0.1)
+	  }
+	  if (audio.volume == 0.0) {
+		 radius = lerp(radius, window.innerWidth, 0.02)
+		 document.getElementById("zoomcircle").setAttribute('r', radius)
+	  }
+	  if (radius > window.innerWidth - 50) {
+	     if (alpha2 != 0) {
+		   alpha2 = clamp(alpha2 - 0.01, 0, 1)
+		 }
+		 if (alpha2 === 0) {
+		   window.location.replace(links[ready])
+		 }
 	  }
       for (let i = 0; i < selamount; i++) {
+	    let tempalpha = alpha2
 	    image_gscale = (i == selected) ? 0.6 : 1
 		image_gscale = (ready == i) ? 2 : image_gscale
 		image_scale[i] = lerp(image_scale[i], image_gscale, 0.1)
@@ -259,9 +342,9 @@
         sely[i] = eheight / 2 + (Math.sin(anglerad) * mult)
 		context.globalCompositeOperation = "source-over";
 		if (ready > -1 && i != ready) {
-		  context.globalCompositeOperation = "destination-over";
+		  tempalpha = 0;
 		}
-        drawImageCenteredRotated(img[i], context, selx[i], sely[i], 0, image_scale[i], image_scale[i]);
+        drawImageCenteredRotated(img[i], context, selx[i], sely[i], 0, image_scale[i], image_scale[i], tempalpha);
       }
       elm.onmousedown = function(){
 	    if (ready == -1) {
