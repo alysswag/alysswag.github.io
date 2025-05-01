@@ -190,21 +190,6 @@
 	  document.getElementById('maindivwhatever').style.animation="fadeIn 11.75s forwards";
 	  document.title = "BUS STATION"
 	}
-	
-	function fadeAudio() {
-      var fadeAudio = setInterval(function () {
-
-          // Only fade if not at zero already
-          if (audio.volume != 0.0) {
-              audio.volume = clamp(audio.volume - 0.02, 0.0, 1.0)
-          }
-          // When volume at zero stop all the intervalling
-          if (audio.volume === 0.0) {
-              clearInterval(fadeAudio);
-          }
-      }, 200);
-
-	}
 
     // i stole this from the gamemaker manual websitele
 	function angle_difference(dest, src){
@@ -281,7 +266,7 @@
 		 title.innerHTML = "bye bye!"
 		 desc.innerHTML = "see ya!"
 		 document.getElementById('maindivwhatever').style.animation="centerYourself 2s ease-out forwards";
-		 fadeAudio()
+		 audio.volume = 0
 	  }
 	  if (ready == -1) {
         selected = -1
