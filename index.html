@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
   <link rel="manifest" href="site.webmanifest">
+  <link rel="preload" href="mus/bus_station/song.mp3">
   <title>Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? Welcome. Welcome! Welcome? </title>
   <style>
     .main {
@@ -199,6 +200,7 @@
     // rotary phonele
 	
 	const audio = new Audio('snd/bus_station_intro.mp3');
+	const sfx = new Audio();
 	const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 	let ready = -1
     let selamount = 5
@@ -255,6 +257,8 @@
         targetAngle = radToDeg(Math.atan2(diffY, diffX) - degToRad(calc));
 		if (targetAngle > 75 - calc && targetAngle < 105 - calc) {
 		  targetAngle = 90 - calc
+		  sfx.src = "snd/rotary_phone_select.mp3"
+		  sfx.play()
 		}
       }
     });
@@ -267,15 +271,26 @@
 		 desc.innerHTML = "see ya!"
 		 document.getElementById('maindivwhatever').style.animation="centerYourself 2s ease-out forwards";
 		 audio.volume = 0
+		 sfx.src = "snd/blind.mp3"
+		 sfx.play()
 	  }
 	  if (ready == -1) {
+	    if (selected > -1) {
+	      sfx.src = "snd/rotary_phone_deselect.mp3"
+		  sfx.play()
+		}
         selected = -1
         targetAngle = -90
+
 		already = false
 	  }
     }
 	elm.onmouseleave = function(){
 	  if (ready == -1) {
+	  	if (selected > -1) {
+	      sfx.src = "snd/rotary_phone_deselect.mp3"
+		  sfx.play()
+		}
 	    selected = -1
 	    targetAngle = -90
 		already = false
@@ -311,10 +326,10 @@
 	  }
 	  if (radius > window.innerWidth - 50) {
 	     if (alpha2 != 0) {
-		   alpha2 = clamp(alpha2 - 0.01, 0, 1)
+		   alpha2 = clamp(alpha2 - 0.005, 0, 1)
 		 }
 		 if (alpha2 === 0) {
-		   window.location.replace(links[ready])
+		   setTimeout(function(){window.location.replace(links[ready])}, 2000)
 		 }
 	  }
       for (let i = 0; i < selamount; i++) {
@@ -336,6 +351,8 @@
           for (let i = 0; i < selamount; i++) {
             if (mxx > selx[i] - 24 && myy > sely[i] - 24 && mxx < selx[i] + 24 && myy < sely[i] + 24){
               selected = i
+			  sfx.src = "snd/rotary_phone_pickup.mp3"
+			  sfx.play()
             }
           }
 		}
