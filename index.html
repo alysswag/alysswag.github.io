@@ -21,7 +21,7 @@
     }
     .text {
       font-family: "Didact Gothic", sans-serif;
-      font-size: 18px;
+      font-size: 20px;
       text-align: center;
 	  color: white;
 	  text-shadow: 2px 2px black;
@@ -37,14 +37,30 @@
 	  color: white;
 	  background-color: black;
 	}
+	button {
+	  font-family: "Courier New", sans-serif;
+	  font-size: 18px;
+	  text-align: center;
+	  color: white;
+	  background-color: black;
+	}
 	.center {
 	  margin: 0;
 	  position: absolute;
 	  top: 50%;
 	  left: 50%;
+	  background-color: black;
+	  padding: 50px;
+	  border-radius: 50px;
 	  transform: translate(-50%, -50%);
 	}
-	
+	.creddit {
+	  font-family: "Courier New", sans-serif;
+	  font-size: 10px;
+	  line-height: 0.2;
+	  text-align: center;
+	  color: gray;
+	}
 	
 	.overlay-black{
       position: absolute;
@@ -54,7 +70,9 @@
       z-index:1;
       background-color:black;
 	  opacity:1;
-	  animation: idle
+	  background-image: url("wip/img/bg.png");
+	  background-size: 181px;
+	  animation: scroll 15s linear infinite
 	}
 	
 	.background{
@@ -93,6 +111,9 @@
 	@keyframes fadeOut {
 	  100% {opacity:0}
 	}
+	@keyframes scroll {
+	  100% {background-position:181px 181px}
+	}
   </style>
 </head>
 <body>
@@ -100,9 +121,18 @@
     <div class="center">
       <h1 class="entrance">welcome to my site!</h1>
 	  <p class="entrance">please click the button below to enter:</p>
-      <button type="button" onclick="init()" class="entrance">ENTER</button>
+	  <div style="text-align: center;"><button type="button" onclick="init()" class="entrance">ENTER</button></div>
 	  <p class="entrance">alternatively, if you're allergic to javascript...</p>
-	  <a href="wip/index.html" class="entrance";">waaaah! javascript is scawy!!!</a>
+	  <div style="text-align:center">
+	    <a href="wip/index.html" class="entrance";">waaaah! javascript is scawy!!!</a>
+	  </div>
+	</div>
+	  <div style="position: absolute; bottom: 8px; right: 8px;">
+	    <button type="button" id="mutebutton" onclick="muteaudio()">mute music</button>
+	  </div>
+	  <div style="position: absolute; bottom: 0px; left: 50%; transform: translate(-50%, 0%)" class="creddit">
+	    <p>made with <3</p>
+	    <p>nc 2025</p>
 	  </div>
   </div>
   <div class="background" id="bgdiv">
@@ -186,9 +216,18 @@
 
       audio.play();
 	  
-	  document.getElementById('fader').style.animation="fadeInOverlay 11.75s forwards";
+	  document.getElementById('fader').style.animation="scroll 15s linear infinite, fadeInOverlay 11.75s forwards";
+	  var nodes = document.getElementById('fader').getElementsByTagName('*');
+      for(var i = 0; i < nodes.length; i++){
+        nodes[i].disabled = true;
+      }
 	  document.getElementById('maindivwhatever').style.animation="fadeIn 11.75s forwards";
 	  document.title = "BUS STATION"
+	}
+	function muteaudio() {
+	  let buttone = document.getElementById('mutebutton')
+	  audio.muted = !audio.muted
+	  if (audio.muted) { buttone.innerHTML = "unmute music" } else { buttone.innerHTML = "mute music" }
 	}
 
     // i stole this from the gamemaker manual websitele
@@ -256,6 +295,8 @@
         targetAngle = radToDeg(Math.atan2(diffY, diffX) - degToRad(calc));
 		if (targetAngle > 75 - calc && targetAngle < 105 - calc) {
 		  targetAngle = 90 - calc
+		}
+		if (((targetAngle > -15 - calc && targetAngle < 15 - calc) || (targetAngle > 165 - calc && targetAngle < 195 - calc)) && sfx.paused) {
 		  sfx.src = "snd/rotary_phone_select.mp3"
 		  sfx.play()
 		}
@@ -328,7 +369,7 @@
 		   alpha2 = clamp(alpha2 - 0.005, 0, 1)
 		 }
 		 if (alpha2 === 0) {
-		   setTimeout(function(){window.location.replace(links[ready])}, 2000)
+		   setTimeout(function(){window.location.replace(links[ready])}, 500)
 		 }
 	  }
       for (let i = 0; i < selamount; i++) {
