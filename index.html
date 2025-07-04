@@ -117,6 +117,13 @@
   </style>
 </head>
 <body>
+  <!-- preloading audio -->
+  <audio preload="auto"><source src="snd/bus_station_intro.mp3" type="audio/mpeg"></audio>
+  <audio preload="auto"><source src="snd/blind.mp3" type="audio/mpeg"></audio>
+  <audio preload="auto"><source src="snd/rotary_phone_deselect.mp3" type="audio/mpeg"></audio>
+  <audio preload="auto"><source src="snd/rotary_phone_select.mp3" type="audio/mpeg"></audio>
+  <audio preload="auto"><source src="snd/rotary_phone_pickup.mp3" type="audio/mpeg"></audio>
+  <audio preload="auto"><source src="mus/bus_station/song.mp3" type="audio/mpeg"></audio>
   <div class="overlay-black" id="fader">
     <div class="center">
       <h1 class="entrance">welcome to my site!</h1>
@@ -179,6 +186,11 @@
 		x: evt.clientX - rect.left,
 		y: evt.clientY - rect.top
 	  };
+	}
+	function playSound(snd) {
+	  sfx.pause()
+	  sfx.src = "snd/" + snd + ".mp3"
+	  sfx.play()
 	}
 
 	function canvasLoop(loopFunc){
@@ -296,9 +308,8 @@
 		if (targetAngle > 75 - calc && targetAngle < 105 - calc) {
 		  targetAngle = 90 - calc
 		}
-		if (((targetAngle > -15 - calc && targetAngle < 15 - calc) || (targetAngle > 165 - calc && targetAngle < 195 - calc)) && sfx.paused) {
-		  sfx.src = "snd/rotary_phone_select.mp3"
-		  sfx.play()
+		if ((targetAngle > -15 - calc && targetAngle < 15 - calc) || (targetAngle > 165 - calc && targetAngle < 195 - calc)) {
+		  playSound("rotary_phone_select")
 		}
       }
     });
@@ -311,13 +322,11 @@
 		 desc.innerHTML = "see ya!"
 		 document.getElementById('maindivwhatever').style.animation="centerYourself 2s ease-out forwards";
 		 audio.volume = 0
-		 sfx.src = "snd/blind.mp3"
-		 sfx.play()
+		 playSound("blind")
 	  }
 	  if (ready == -1) {
 	    if (selected > -1) {
-	      sfx.src = "snd/rotary_phone_deselect.mp3"
-		  sfx.play()
+		  playSound("rotary_phone_deselect")
 		}
         selected = -1
         targetAngle = -90
@@ -328,8 +337,7 @@
 	elm.onmouseleave = function(){
 	  if (ready == -1) {
 	  	if (selected > -1) {
-	      sfx.src = "snd/rotary_phone_deselect.mp3"
-		  sfx.play()
+		  playSound("rotary_phone_deselect")
 		}
 	    selected = -1
 	    targetAngle = -90
@@ -391,8 +399,7 @@
           for (let i = 0; i < selamount; i++) {
             if (mxx > selx[i] - 24 && myy > sely[i] - 24 && mxx < selx[i] + 24 && myy < sely[i] + 24){
               selected = i
-			  sfx.src = "snd/rotary_phone_pickup.mp3"
-			  sfx.play()
+			  playSound("rotary_phone_pickup")
             }
           }
 		}
