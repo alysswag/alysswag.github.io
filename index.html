@@ -42,8 +42,29 @@
 	  font-size: 18px;
 	  text-align: center;
 	  color: white;
+	  border-radius: 10px;
+	  padding: 5px;
+	  border: 2px solid white;
 	  background-color: black;
+	  transition-duration: 1s;
+	  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 	}
+	
+	button:hover {
+	  scale: 1.1
+	}
+	button:active {
+	  background-color: white;
+	  border-color: black;
+	  color: black;
+	  scale: 0.9
+	}
+	button.disabled {
+	  color: gray;
+	}
+	button.disabled:hover {scale: 1}
+	button.disabled:active {scale: 1; background-color: black; border-color: white; color: gray;}
+	
 	.center {
 	  margin: 0;
 	  position: absolute;
@@ -51,7 +72,8 @@
 	  left: 50%;
 	  background-color: black;
 	  padding: 50px;
-	  border-radius: 50px;
+	  border-radius: 25px;
+	  outline: 5px solid white;
 	  transform: translate(-50%, -50%);
 	}
 	.creddit {
@@ -59,6 +81,29 @@
 	  font-size: 10px;
 	  line-height: 0.2;
 	  text-align: center;
+	  color: gray;
+	}
+	.webring {
+	  background-color: white;
+	  border-radius: 25px;
+	  outline: 5px solid black;
+	  width: 200px;
+	}
+	#nojslink {
+	  transition-duration: 1s;
+	  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+	}
+	#nojslink:hover {
+	  scale: 1.05;
+	  text-shadow: 0 0 25px white;
+	}
+	#nojslink:active {
+	  scale: 0.95;
+	  text-shadow: 0 0 0;
+	}
+	
+	#nojslink.disabled {
+	  pointer-events: none;
 	  color: gray;
 	}
 	
@@ -130,7 +175,7 @@
 	  <p class="entrance">please click the button below to enter:</p>
 	  <div style="text-align: center;"><button type="button" onclick="init()" class="entrance">ENTER</button></div>
 	  <p class="entrance">alternatively, if you're allergic to javascript...</p>
-	  <div style="text-align:center">
+	  <div style="text-align:center" id="nojslink">
 	    <a href="wip/index.html" class="entrance";">waaaah! javascript is scawy!!!</a>
 	  </div>
 	</div>
@@ -140,6 +185,12 @@
 	  <div style="position: absolute; bottom: 0px; left: 50%; transform: translate(-50%, 0%)" class="creddit">
 	    <p>made with <3</p>
 	    <p>nc 2025</p>
+	  </div>
+	  <div style="position: absolute; bottom: 8px; left: 8px; transform: translate(0%, 0%)" class="webring">
+	    <div id='noxydiscord-webring'>
+			<script type="text/javascript" src="https://kaerue.neocities.org/webring/onionring-variables.js"></script>
+			<script type="text/javascript" src="https://kaerue.neocities.org/webring/onionring-widget.js"></script>
+		</div>
 	  </div>
   </div>
   <div class="background" id="bgdiv">
@@ -229,10 +280,12 @@
       audio.play();
 	  
 	  document.getElementById('fader').style.animation="scroll 15s linear infinite, fadeInOverlay 11.75s forwards";
-	  var nodes = document.getElementById('fader').getElementsByTagName('*');
+	  var nodes = document.querySelectorAll("button[type=button]");
       for(var i = 0; i < nodes.length; i++){
         nodes[i].disabled = true;
+		nodes[i].setAttribute("class", "disabled");
       }
+	  document.getElementById("nojslink").setAttribute("class", "disabled");
 	  document.getElementById('maindivwhatever').style.animation="fadeIn 11.75s forwards";
 	  document.title = "BUS STATION"
 	}
