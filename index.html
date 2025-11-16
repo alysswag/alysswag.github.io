@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap" rel="stylesheet">
@@ -13,7 +14,7 @@
     .main {
       position: fixed;
 	  top: 50%;
-	  left: 25%;
+	  left: 50%;
 	  transform: translate(-50%, -50%);
 	  height: 256px;
       width: 256px;
@@ -54,9 +55,8 @@
 	  scale: 1.1
 	}
 	button:active {
-	  background-color: white;
-	  border-color: black;
-	  color: black;
+	  border-color: gray;
+	  color: gray;
 	  scale: 0.9
 	}
 	button.disabled {
@@ -91,7 +91,7 @@
 	  font-size: 10px;
 	  color: white;
 	  background-color: black;
-	  width: 200px;
+	  width: 210px;
 	}
 	#nojslink {
 	  transition-duration: 1s;
@@ -180,7 +180,7 @@
 	  <div style="text-align: center;"><button type="button" onclick="init()" class="entrance">ENTER</button></div>
 	  <p class="entrance">alternatively, if you're allergic to javascript...</p>
 	  <div style="text-align:center" id="nojslink">
-	    <a href="wip/index.html" class="entrance";">waaaah! javascript is scawy!!!</a>
+	    <a href="wip/" class="entrance";">waaaah! javascript is scawy!!!</a>
 	  </div>
 	</div>
 	  <div style="position: absolute; bottom: 8px; right: 8px;">
@@ -207,7 +207,7 @@
     </svg>
   </div>
   <div class="main" id="maindivwhatever">
-    <canvas class="menu" height="256" id="rotary" width="256"></canvas>
+    <canvas class="menu" height="256" id="rotary" width="256" style="touch-action: none;"></canvas>
   </div>
   <script>
     // firefox is weirdle
@@ -242,6 +242,15 @@
 		y: evt.clientY - rect.top
 	  };
 	}
+	function getTouchPos(canvas, evt) {
+	  var rect = canvas.getBoundingClientRect();
+      var touch = evt.touches[0]
+	  return {
+		x: touch.clientX - rect.left,
+		y: touch.clientY - rect.top
+	  };
+	}
+	
 	function playSound(snd) {
 	  sfx.pause()
 	  sfx.src = "snd/" + snd + ".mp3"
@@ -256,6 +265,16 @@
 	  canvas.addEventListener('mousemove', function(evt) {
 	    var mousePos = getMousePos(canvas, evt);
         callback(mousePos.x, mousePos.y);
+      }, false);
+	}
+	function createTouchMoveEvent(canvas, callback){
+	  canvas.addEventListener('touchmove', function(evt) {
+		var touchPos = getTouchPos(canvas, evt);
+		callback(touchPos.x, touchPos.y);
+      }, false);
+	  canvas.addEventListener('touchstart', function(evt) {
+		var touchPos = getTouchPos(canvas, evt);
+		callback(touchPos.x, touchPos.y);
       }, false);
 	}
 
@@ -310,7 +329,7 @@
 	const sfx = new Audio();
 	const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 	let ready = -1
-    let selamount = 5
+    let selamount = 4
     let selected = -2
     let selx = []
     let sely = []
@@ -328,16 +347,15 @@
     let ewidth = elm.clientWidth,
       eheight = elm.clientHeight;
     let context = elm.getContext("2d");
-	let imagePaths = ["img/placeholdericon_0.png", "img/placeholdericon_1.png", "img/placeholdericon_2.png", "img/placeholdericon_3.png", "img/placeholdericon_4.png"]
-	let titles = ["Alyssum Fields", "La Galería", "Project Cosmos", "The Waiting Room", "Credits"]
+	let imagePaths = ["img/placeholdericon_0.png", "img/placeholdericon_1.png", "img/placeholdericon_2.png", "img/placeholdericon_4.png"]
+	let titles = ["Alyssum Fields", "La Galeria", "Project Cosmos", "Credits"]
 	let subtitles = [
 	  ["what's north?", "who's north?", "where's north?", "when's north?", "how's north?"],
 	  ["SHHH!", "look ma, i draw!", "please mind the spiders!", "only the finest of arts!", "doomguy_grunt_slowed.wav"],
 	  ["one small step for north, one big step for northkind.", "alys-sun", "And then North said, \'let there be projects!\'", "these are finished, probably.", "SPAAAAAACE!"],
-	  ["PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER"],
 	  ["idiots", "fools", "imbeciles", "babies", "dumb people"]
 	]
-	let links = ["wip/index.html", "wip/index.html", "wip/index.html", "wip/index.html", "wip/index.html"]
+	let links = ["wip/index.html", "wip/index.html", "wip/index.html", "wip/index.html"]
 	let already = false
 	let truetitle = "welcome"
 	let truesubtitle = "hi"
@@ -370,7 +388,23 @@
 		}
       }
     });
-    elm.onmouseup = function(){
+	createTouchMoveEvent(elm, (mx, my) => {
+      let diffX = mx - ewidth / 2;
+      let diffY = my - eheight / 2;
+      mxx = mx
+      myy = my
+      if (selected > -1) {
+        let calc = ((150 / selamount) * (selected - ((selamount - 1) / 2)))
+        targetAngle = radToDeg(Math.atan2(diffY, diffX) - degToRad(calc));
+		if (targetAngle > 75 - calc && targetAngle < 105 - calc) {
+		  targetAngle = 90 - calc
+		}
+		if ((targetAngle > -15 - calc && targetAngle < 15 - calc) || (targetAngle > 165 - calc && targetAngle < 195 - calc)) {
+		  playSound("rotary_phone_select")
+		}
+      }
+    });
+    elm.onmouseup = elm.ontouchend = function(){
 	  if (targetAngle == 90 - ((150 / selamount) * (selected - ((selamount - 1) / 2)))) {
 	     targetAngle = 0
 	     ready = selected
@@ -391,7 +425,7 @@
 		already = false
 	  }
     }
-	elm.onmouseleave = function(){
+	elm.onmouseleave = elm.ontouchcancel = function(){
 	  if (ready == -1) {
 	  	if (selected > -1) {
 		  playSound("rotary_phone_deselect")
@@ -426,7 +460,7 @@
 		alpha = lerp(alpha, 0, 0.1)
 	  }
 	  if (audio.volume == 0.0) {
-		 radius = lerp(radius, window.innerWidth, 0.02)
+		 radius = lerp(radius, window.innerWidth > window.innerHeight ? window.innerWidth : window.innerHeight, 0.02)
 		 document.getElementById("zoomcircle").setAttribute('r', radius)
 	  }
 	  if (radius > window.innerWidth - 50) {
@@ -451,7 +485,7 @@
 		}
         drawImageCenteredRotated(img[i], context, selx[i], sely[i], 0, image_scale[i], image_scale[i], tempalpha);
       }
-      elm.onmousedown = function(){
+      elm.onmousedown = elm.ontouchstart = function(){
 	    if (ready == -1) {
           for (let i = 0; i < selamount; i++) {
             if (mxx > selx[i] - 24 && myy > sely[i] - 24 && mxx < selx[i] + 24 && myy < sely[i] + 24){
